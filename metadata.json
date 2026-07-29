@@ -1,0 +1,6 @@
+{
+  "name": "V2Shop Telegram & VPN Panel Manager",
+  "description": "Modern Telegram shop bot & VPN panel management platform with automated subscription links, X-UI/Marzban integration, live bot simulator, and one-click VPS deployment installer.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
