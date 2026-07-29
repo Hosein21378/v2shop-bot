@@ -194,6 +194,30 @@ DATABASE_URL="sqlite:///v2shop.db"
             : `Your repository https://github.com/${githubRepo} is currently empty. Follow one of the options below to add the required files:`}
         </p>
 
+        {/* Quick README.md Add Callout */}
+        <div className="bg-gradient-to-r from-emerald-950/60 to-slate-950 border border-emerald-500/40 rounded-xl p-4 space-y-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <div className="text-sm font-bold text-emerald-300 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-emerald-400" />
+                <span>{isFa ? 'راهنمای کپی و قرار دادن دستورات در دکمه Add a README گیت‌هاب' : 'Add a README Button Instructions'}</span>
+              </div>
+              <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                {isFa
+                  ? 'در گیت‌هاب روی دکمه سبز رنگ "Add a README" یا "Create new file" کلیک کنید، متن زیر را کپی کرده و در صفحه گیت‌هاب پیست (Paste) و Commit نمایید:'
+                  : 'Click the "Add a README" button in your GitHub repo, copy the text below, paste it into GitHub, and commit changes:'}
+              </p>
+            </div>
+            <button
+              onClick={() => handleCopy(readmeMdCode, 'quick_readme')}
+              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-950/50 flex items-center gap-2 transition-all shrink-0"
+            >
+              {copiedSection === 'quick_readme' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              <span>{copiedSection === 'quick_readme' ? (isFa ? 'محتوای README کپی شد!' : 'Copied!') : (isFa ? 'کپی کامل متن README.md' : 'Copy README.md Text')}</span>
+            </button>
+          </div>
+        </div>
+
         {/* Option A: Web UI */}
         <div className="bg-slate-950/80 border border-indigo-500/30 rounded-xl p-4 space-y-3">
           <div className="text-xs font-bold text-indigo-300 flex items-center gap-2">
