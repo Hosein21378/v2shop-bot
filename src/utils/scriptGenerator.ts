@@ -21,8 +21,9 @@ echo -e "\${BLUE}=========================================================\${NC}
 
 # 1. Update System Packages
 echo -e "\${YELLOW}[1/5] Updating system packages...\${NC}"
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y curl wget git python3 python3-pip python3-venv docker.io docker-compose-plugin
+sudo apt update -y
+sudo apt install -y curl wget git python3 python3-pip python3-venv || true
+sudo apt install -y docker.io docker-compose-plugin || sudo apt install -y docker.io docker-compose || true
 
 # 2. Setup Working Directory
 echo -e "\${YELLOW}[2/5] Creating application folder...\${NC}"
@@ -336,6 +337,62 @@ docker compose restart
 }
 
 export function generateOneLineCommand(githubRepo: string = 'your-username/v2shop-bot'): string {
-
   return `bash <(curl -sSL https://raw.githubusercontent.com/${githubRepo}/main/install.sh)`;
+}
+
+export function generateDirectVpsInstaller(botSettings: BotSettings): string {
+  const token = botSettings.botToken;
+  const adminIds = botSettings.adminIds.join(',');
+  const channel = botSettings.mandatoryChannel;
+  const support = botSettings.supportUsername;
+  const card = botSettings.paymentGateways.cardToCard.cardNumber;
+  const holder = botSettings.paymentGateways.cardToCard.cardHolder;
+  const bank = botSettings.paymentGateways.cardToCard.bankName;
+
+  return `apt update && apt install -y curl git python3 python3-pip python3-venv && mkdir -p /opt/v2shop-bot && cd /opt/v2shop-bot && cat << 'EOF' > config.env
+BOT_TOKEN="${token}"
+ADMIN_IDS="${adminIds}"
+MANDATORY_CHANNEL="${channel}"
+SUPPORT_USERNAME="${support}"
+CARD_NUMBER="${card}"
+CARD_HOLDER="${holder}"
+BANK_NAME="${bank}"
+EOF
+python3 -m venv venv && ./venv/bin/pip install python-telegram-bot requests pydantic
+cat << 'EOF' > bot.py
+import os, sys
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
+
+BOT_TOKEN = os.getenv("BOT_TOKEN", "${token}")
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton("🛍️ خرید اشتراک", callback_data="buy_plans")],
+        [InlineKeyboardButton("👤 حساب کاربری", callback_data="my_account"), InlineKeyboardButton("🎧 پشتیبانی", url="https://t.me/${support.replace('@', '')}")],
+    ]
+    await update.message.reply_text("🚀 به ربات فروش V2Shop خوش آمدید!", reply_markup=InlineKeyboardMarkup(keyboard))
+
+if __name__ == "__main__":
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.run_polling()
+EOF
+cat << 'EOF' > /etc/systemd/system/v2shop-bot.service
+[Unit]
+Description=V2Shop Telegram Bot Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/v2shop-bot
+ExecStart=/opt/v2shop-bot/venv/bin/python3 /opt/v2shop-bot/bot.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload && systemctl enable v2shop-bot && systemctl restart v2shop-bot && systemctl status v2shop-bot --no-pager`;
 }

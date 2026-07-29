@@ -5,7 +5,8 @@ import {
   generateDockerCompose, 
   generatePythonBotCode, 
   generateOneLineCommand,
-  generateReadmeMd 
+  generateReadmeMd,
+  generateDirectVpsInstaller 
 } from '../utils/scriptGenerator';
 import { 
   Terminal, 
@@ -46,6 +47,7 @@ export const InstallerDeployView: React.FC<InstallerDeployViewProps> = ({
   const pythonBotCode = generatePythonBotCode(settings);
   const readmeMdCode = generateReadmeMd(settings, githubRepo);
   const oneLiner = generateOneLineCommand(githubRepo);
+  const directVpsInstaller = generateDirectVpsInstaller(settings);
 
   const envCode = `BOT_TOKEN="${settings.botToken}"
 ADMIN_IDS="${settings.adminIds.join(',')}"
@@ -169,7 +171,84 @@ DATABASE_URL="sqlite:///v2shop.db"
         </p>
       </div>
 
+      {/* Error Analysis & Direct Installer Box */}
+      <div className="bg-gradient-to-br from-amber-950/80 via-slate-900 to-slate-900 border-2 border-amber-500/50 rounded-2xl p-5 space-y-4 shadow-xl">
+        <div className="flex items-center justify-between border-b border-amber-500/20 pb-3">
+          <h3 className="text-sm font-bold text-amber-300 flex items-center gap-2">
+            <ShieldAlert className="w-5 h-5 text-amber-400" />
+            <span>{isFa ? 'دلیل خطاهای مشاهده شده در سرور شما و راه حل فوری' : 'Errors Explanation & Instant Solution'}</span>
+          </h3>
+          <span className="text-[10px] px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">
+            {isFa ? 'راهنمای رفع ارور' : 'Fix Guide'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 space-y-1.5">
+            <div className="font-bold text-rose-400 flex items-center gap-1.5">
+              <span>❌ {isFa ? 'دلیل خطای docker-compose-plugin' : 'Reason for docker-compose-plugin Error'}</span>
+            </div>
+            <p className="text-slate-300 text-[11px] leading-relaxed">
+              {isFa 
+                ? 'در مخازن رسمی و استاندارد ابونتو/دبیان، پکیج docker-compose-plugin وجود ندارد. اسکریپت ویرایش گردید تا بدون توقف نصب را ادامه دهد.'
+                : 'docker-compose-plugin is not in Ubuntu/Debian default apt repos. The script now bypasses this cleanly.'}
+            </p>
+          </div>
+
+          <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 space-y-1.5">
+            <div className="font-bold text-rose-400 flex items-center gap-1.5">
+              <span>❌ {isFa ? 'دلیل خطای line 1: 404' : 'Reason for 404 Error'}</span>
+            </div>
+            <p className="text-slate-300 text-[11px] leading-relaxed">
+              {isFa 
+                ? `ریپازیتوری https://github.com/${githubRepo} خالی بوده و فایل install.sh در آن ثبت نشده است.`
+                : `Your repository is currently empty and install.sh has not been uploaded yet.`}
+            </p>
+          </div>
+
+          <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 space-y-1.5">
+            <div className="font-bold text-rose-400 flex items-center gap-1.5">
+              <span>❌ {isFa ? 'دلیل خطای git: command not found' : 'Reason for missing Git Error'}</span>
+            </div>
+            <p className="text-slate-300 text-[11px] leading-relaxed">
+              {isFa
+                ? 'روی سرور ابری ابزار git نصب نیست. دستور زیر پیش‌نیازها را به‌طور خودکار نصب می‌کند.'
+                : 'Git package is not yet installed on your Ubuntu VPS server.'}
+            </p>
+          </div>
+        </div>
+
+        {/* Direct Auto-Installer Box (No GitHub required!) */}
+        <div className="bg-slate-950 border border-emerald-500/50 rounded-xl p-4 space-y-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <div>
+              <div className="text-xs font-bold text-emerald-300 flex items-center gap-2">
+                <Zap className="w-4 h-4 text-emerald-400" />
+                <span>{isFa ? '🚀 دستور نصب مستقیم و کامل (بدون نیاز به گیت‌هاب / Standalone VPS Installer)' : 'Direct Standalone Installer Command'}</span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1">
+                {isFa
+                  ? 'این دستور پکیج‌های git و python را نصب کرده و ربات را مستقیماً روی VPS شما بدون نیاز به گیت‌هاب می‌سازد و روشن می‌کند:'
+                  : 'This command installs git, python, generates all files on VPS, and launches the service immediately:'}
+              </p>
+            </div>
+            <button
+              onClick={() => handleCopy(directVpsInstaller, 'direct_vps')}
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg flex items-center gap-1.5 shrink-0 transition-all"
+            >
+              {copiedSection === 'direct_vps' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              <span>{copiedSection === 'direct_vps' ? (isFa ? 'کپی شد!' : 'Copied!') : (isFa ? 'کپی دستور نصب مستقیم' : 'Copy Direct Installer')}</span>
+            </button>
+          </div>
+
+          <pre className="bg-slate-900 border border-slate-800 rounded-lg p-3 text-[11px] font-mono text-emerald-400 overflow-x-auto max-h-36 leading-relaxed dir-ltr text-left">
+            {directVpsInstaller}
+          </pre>
+        </div>
+      </div>
+
       {/* GitHub Setup Instructions Steps */}
+
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
@@ -194,27 +273,58 @@ DATABASE_URL="sqlite:///v2shop.db"
             : `Your repository https://github.com/${githubRepo} is currently empty. Follow one of the options below to add the required files:`}
         </p>
 
-        {/* Quick README.md Add Callout */}
-        <div className="bg-gradient-to-r from-emerald-950/60 to-slate-950 border border-emerald-500/40 rounded-xl p-4 space-y-3">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-              <div className="text-sm font-bold text-emerald-300 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-emerald-400" />
-                <span>{isFa ? 'راهنمای کپی و قرار دادن دستورات در دکمه Add a README گیت‌هاب' : 'Add a README Button Instructions'}</span>
+        {/* Quick install.sh & README.md Add Callouts */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="bg-gradient-to-r from-amber-950/70 via-slate-900 to-slate-950 border border-amber-500/50 rounded-xl p-4 space-y-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <div className="text-sm font-bold text-amber-300 flex items-center gap-2">
+                  <Terminal className="w-4 h-4 text-amber-400" />
+                  <span>{isFa ? 'فایل اصلی install.sh (حل ارور 404)' : 'Fix 404: Copy install.sh Code'}</span>
+                </div>
+                <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                  {isFa
+                    ? 'فایل install.sh اسکریپت اصلی نصب در گیت‌هاب است. این کد را کپی کرده و در گیت‌هاب فایلی به نام install.sh بسازید:'
+                    : 'Copy this install.sh script and paste it into a file named install.sh on GitHub:'}
+                </p>
               </div>
-              <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                {isFa
-                  ? 'در گیت‌هاب روی دکمه سبز رنگ "Add a README" یا "Create new file" کلیک کنید، متن زیر را کپی کرده و در صفحه گیت‌هاب پیست (Paste) و Commit نمایید:'
-                  : 'Click the "Add a README" button in your GitHub repo, copy the text below, paste it into GitHub, and commit changes:'}
-              </p>
+              <button
+                onClick={() => {
+                  setActiveCodeTab('sh');
+                  handleCopy(installShCode, 'quick_install_sh');
+                }}
+                className="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-lg flex items-center gap-2 transition-all shrink-0"
+              >
+                {copiedSection === 'quick_install_sh' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                <span>{copiedSection === 'quick_install_sh' ? (isFa ? 'کپی شد!' : 'Copied!') : (isFa ? 'کپی کد install.sh' : 'Copy install.sh')}</span>
+              </button>
             </div>
-            <button
-              onClick={() => handleCopy(readmeMdCode, 'quick_readme')}
-              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-950/50 flex items-center gap-2 transition-all shrink-0"
-            >
-              {copiedSection === 'quick_readme' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              <span>{copiedSection === 'quick_readme' ? (isFa ? 'محتوای README کپی شد!' : 'Copied!') : (isFa ? 'کپی کامل متن README.md' : 'Copy README.md Text')}</span>
-            </button>
+          </div>
+
+          <div className="bg-gradient-to-r from-emerald-950/70 via-slate-900 to-slate-950 border border-emerald-500/40 rounded-xl p-4 space-y-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <div className="text-sm font-bold text-emerald-300 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-emerald-400" />
+                  <span>{isFa ? 'فایل راهنما README.md (برای Add a README)' : 'Copy README.md Code'}</span>
+                </div>
+                <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                  {isFa
+                    ? 'در گیت‌هاب روی Add a README کلیک کنید و متن کپی شده را پیست نمایید تا صفحه ریپازیتوری شما کامل شود:'
+                    : 'Click "Add a README" on GitHub and paste this content:'}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setActiveCodeTab('readme');
+                  handleCopy(readmeMdCode, 'quick_readme');
+                }}
+                className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg flex items-center gap-2 transition-all shrink-0"
+              >
+                {copiedSection === 'quick_readme' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                <span>{copiedSection === 'quick_readme' ? (isFa ? 'کپی شد!' : 'Copied!') : (isFa ? 'کپی متن README.md' : 'Copy README.md')}</span>
+              </button>
+            </div>
           </div>
         </div>
 
