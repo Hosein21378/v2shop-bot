@@ -38,7 +38,7 @@ export const InstallerDeployView: React.FC<InstallerDeployViewProps> = ({
 }) => {
   const isFa = lang === 'fa';
 
-  const [githubRepo, setGithubRepo] = useState('Hosein21378/v2shop-bot');
+  const [githubRepo, setGithubRepo] = useState('Hosein21378/shopira-pro');
   const [activeCodeTab, setActiveCodeTab] = useState<'sh' | 'docker' | 'py' | 'env' | 'readme'>('readme');
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
 
@@ -133,7 +133,7 @@ DATABASE_URL="sqlite:///v2shop.db"
             />
           </div>
           <span className="text-xs text-slate-400 self-center">
-            {isFa ? 'مثال: myaccount/v2shop-bot' : 'e.g. myaccount/v2shop-bot'}
+            {isFa ? 'مثال: Hosein21378/shopira-pro' : 'e.g. Hosein21378/shopira-pro'}
           </span>
         </div>
       </div>
@@ -186,34 +186,34 @@ DATABASE_URL="sqlite:///v2shop.db"
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
           <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 space-y-1.5">
             <div className="font-bold text-rose-400 flex items-center gap-1.5">
-              <span>❌ {isFa ? 'دلیل خطای docker-compose-plugin' : 'Reason for docker-compose-plugin Error'}</span>
+              <span>❌ {isFa ? '۱. نبود فایل install.sh در گیت‌هاب' : '1. Missing install.sh on GitHub'}</span>
             </div>
             <p className="text-slate-300 text-[11px] leading-relaxed">
               {isFa 
-                ? 'در مخازن رسمی و استاندارد ابونتو/دبیان، پکیج docker-compose-plugin وجود ندارد. اسکریپت ویرایش گردید تا بدون توقف نصب را ادامه دهد.'
-                : 'docker-compose-plugin is not in Ubuntu/Debian default apt repos. The script now bypasses this cleanly.'}
+                ? `اگر فایل install.sh را هنوز در ریپازیتوری https://github.com/${githubRepo} نساخته‌اید، لینک خام ۴۰۴ می‌دهد. دکمه Add file > Create new file بزنید و فایل install.sh را بسازید.`
+                : `If install.sh is not created yet on GitHub, curl gets 404. Click Add file > Create new file and create install.sh.`}
             </p>
           </div>
 
           <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 space-y-1.5">
             <div className="font-bold text-rose-400 flex items-center gap-1.5">
-              <span>❌ {isFa ? 'دلیل خطای line 1: 404' : 'Reason for 404 Error'}</span>
+              <span>❌ {isFa ? '۲. خصوصی بودن ریپازیتوری (Private)' : '2. Private Repository Status'}</span>
             </div>
             <p className="text-slate-300 text-[11px] leading-relaxed">
               {isFa 
-                ? `ریپازیتوری https://github.com/${githubRepo} خالی بوده و فایل install.sh در آن ثبت نشده است.`
-                : `Your repository is currently empty and install.sh has not been uploaded yet.`}
+                ? 'اگر ریپازیتوری Private باشد، سرور نمی‌تواند فایل را دانلود کند. در تنظیمات گیت‌هاب (Settings) حالت visibility را روی Public بگذارید.'
+                : 'If repository is Private, curl cannot access raw files. Change visibility to Public in GitHub Settings.'}
             </p>
           </div>
 
           <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 space-y-1.5">
             <div className="font-bold text-rose-400 flex items-center gap-1.5">
-              <span>❌ {isFa ? 'دلیل خطای git: command not found' : 'Reason for missing Git Error'}</span>
+              <span>❌ {isFa ? '۳. تفاوت برنچ main و master' : '3. Branch Name mismatch'}</span>
             </div>
             <p className="text-slate-300 text-[11px] leading-relaxed">
               {isFa
-                ? 'روی سرور ابری ابزار git نصب نیست. دستور زیر پیش‌نیازها را به‌طور خودکار نصب می‌کند.'
-                : 'Git package is not yet installed on your Ubuntu VPS server.'}
+                ? 'دستور نصب ویرایش شد تا همزمان هر دو برنچ main و master را بررسی کند تا در صورت تفاوت نام برنچ، خطا ندهد.'
+                : 'The install command has been updated to automatically try both main and master branches.'}
             </p>
           </div>
         </div>
